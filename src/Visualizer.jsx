@@ -1,10 +1,11 @@
 import React, { useState, useRef } from "react";
 
-const STACK_SIZE = 5;
+const DEFAULT_STACK_SIZE = 5;
 
 function Visualizer() {
   const [actions, setActions] = useState([]);
   const [redos, setRedos] = useState([]);
+  const [stackSize, setStackSize] = useState(DEFAULT_STACK_SIZE);
 
   const undo = () => {
     if (actions.length > 0) {
@@ -13,7 +14,7 @@ function Visualizer() {
           return index != prevActions.length - 1;
         });
       });
-      if (redos.length < STACK_SIZE) {
+      if (redos.length < getStackSize()) {
         setRedos((prevRedos) => {
           return [...prevRedos, actions[actions.length - 1]];
         });
@@ -44,13 +45,19 @@ function Visualizer() {
   };
   const random = useRef(1);
 
+  const changeStackSize = (newStackSize) => {
+    setActions([]);
+    setRedos([]);
+    setStackSize(newStackSize);
+  };
+
   const generateRandom = () => {
     return random.current++;
   };
 
   const addAction = () => {
     setActions((prevActions) => {
-      if (prevActions.length < STACK_SIZE) {
+      if (prevActions.length < getStackSize()) {
         return [...prevActions, generateRandom()];
       } else {
         const [_, ...actions] = prevActions;
@@ -59,9 +66,21 @@ function Visualizer() {
     });
   };
 
+  const getStackSize = () => {
+    return stackSize ? stackSize : 1;
+  };
+
   return (
     <div>
       <h1>Undo / Redo</h1>
+      <div>
+        <h1>Stack size: {stackSize ? stackSize : 1}</h1>
+        <input
+          type="number"
+          value={stackSize}
+          onChange={(e) => changeStackSize(e.target.value)}
+        />
+      </div>
       <div>Actions = {JSON.stringify(actions)}</div>
       <div>Redos = {JSON.stringify(redos)}</div>
       <button onClick={addAction}>Add action</button>
